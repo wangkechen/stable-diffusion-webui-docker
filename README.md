@@ -129,3 +129,44 @@ DOCKERFILE=Dockerfile.py310  # Specify Dockerfile
 ```
 
 The next operation is as usual.
+
+### Q: ERROR: docker: Error response from daemon: could not select device driver ““ with capabilities: [[gpu]]
+
+docker在19.03版本之后，可以不用安装nvidia-docker，就能获得GPU的计算支持。
+
+但是，直接在docker中使用GPU设备，出现报错如下：
+
+docker: Error response from daemon: could not select device driver "" with capabilities: [[gpu]].
+
+这个问题可以通过安装nvidia-container-toolkit来解决。
+
+1、添加nvidia-docker的源
+
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | \
+sudo apt-key add -
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | \
+sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+sudo apt-get update
+如果不添加上面的源，可能会报如下错误：
+
+E: Unable to locate package nvidia-container-toolkit
+
+2、安装nvidia-container-toolkit
+
+sudo apt-get install -y nvidia-container-toolkit
+3、重启docker
+
+sudo systemctl restart docker
+问题解决。
+————————————————
+原文链接：https://blog.csdn.net/u013685264/article/details/123206768
+
+
+### Q: Error message : AssertionError: Torch is not able to use GPU; add --skip-torch-cuda-test to COMMANDLINE_ARGS variable to disable this check
+
+add --skip-torch-cuda-test in docker-compose.yml
+
+BUILD_ARGS: --medvram --allow-code --enable-insecure-extension-access --api --listen --port ${PORT} --xformers --exit --skip-torch-cuda-test
+
+and then:  docker compose --profile gpu up -d
